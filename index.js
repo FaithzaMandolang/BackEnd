@@ -39,7 +39,6 @@ const server = http.createServer((req, res) => {
       })
     );
   }
-  // res.write(moment().format("MMMM Do YYYY, h:mm:ss a"));
   res.end();
 });
 
