@@ -37,6 +37,11 @@ app.get("/news/:id", (req, res) => {
   res.send(`Artikel ke- ${req.params.id}`); //routing dinamis pake param/parameter
 });
 
+app.get("/foods", (req, res) => {
+  const { page, sort } = req.query;
+  res.send(`query yang didapat adalah ${page}, sort by ${sort}`); //routing menggunakan query
+});
+
 const hostname = "127.0.0.1";
 const port = 3000;
 app.listen(port, hostname, () =>
