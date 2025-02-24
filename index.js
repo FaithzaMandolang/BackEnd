@@ -1,36 +1,44 @@
 const http = require("https");
-const users = require("./users");
+//const users = require("./users");
 const moment = require("moment");
 const express = require("express");
 const app = express();
-// const morgan = require("morgan");
+const routers = require("./router.js");
+const morgan = require("morgan");
 // const errorhandler = require("errorhandler");
 
-// app.use(morgan("tiny"));
+app.use(morgan("tiny"));
+
+app.use(express.urlencoded({ extended: true })); //x-www blablabla
+
+app.use(express.json()); //raw - json
 
 //routing
-app.get("/", (req, res) => res.send("this is homepage"));
+//app.get("/", (req, res) => res.send("this is homepage"));
 
 //get user seluruh data
-app.get("/users", (req, res) =>
-  res.status(200).json({
-    users,
-  })
-);
+// app.get("/users", (req, res) =>
+//   res.status(200).json({
+//     users,
+//   })
+// );
 
 //get user berdasarkan nama
-app.get("/users/:name", (req, res) => {
-  const name = req.params.name.toLowerCase();
-  const user = users.find((data) => data.name.toLowerCase() === name);
+// app.get("/users/:name", (req, res) => {
+//   const name = req.params.name.toLowerCase();
+//   const user = users.find((data) => data.name.toLowerCase() === name);
 
-  if (!user) {
-    return res.status(404).json({
-      message: "Data user tidak ditemukan",
-    });
-  }
+//   if (!user) {
+//     return res.status(404).json({
+//       message: "Data user tidak ditemukan",
+//     });
+//   }
 
-  res.status(200).json({ user });
-});
+//   res.status(200).json({ user });
+// });
+
+//routing
+app.use(routers);
 
 //middleware respon/biasa untuk 404
 app.use((req, res, next) => {
