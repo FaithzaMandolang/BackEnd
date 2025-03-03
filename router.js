@@ -2,13 +2,27 @@ const express = require("express");
 const users = require("./users");
 const routers = express.Router();
 const path = require("path");
+const fs = require("fs");
+const multer = require("multer");
+const upload = multer({ dest: "public" });
 
 //Routing
+routers.post("/upload", upload.single("file"), (req, res) => {
+  const file = req.file;
+  if (file) {
+    const target = path.join(__dirname, "/public/", file.originalname);
+    fs.renameSync(file.path, target);
+    res.send("file berhasil diupload");
+  } else {
+    res.send("file gagal diupload");
+  }
+});
+
 //download file tanpa path
-// routers.get("/download", (req, res) => {
-//   const filename = "logo.png";
-//   res.sendFile(__dirname + "/download/" + filename);
-// });
+routers.get("/download", (req, res) => {
+  const filename = "logo.png";
+  res.sendFile(__dirname + "/download/" + filename);
+});
 
 //pakai path
 // routers.get("/download", (req, res) => {
