@@ -47,7 +47,18 @@ routers.get("/download", (req, res) => {
 //   res.download(path.join(__dirname, "/download/", filename), "logo-dwd.png");
 // });
 
-routers.post("/login", (req, res) => {
+routers.get("/login", (req, res) => {
+  const { username, password } = req.body;
+  res.status(200).json({
+    status: "success",
+    data: {
+      username: username,
+      password: password,
+    },
+  });
+});
+
+routers.put("/login", (req, res) => {
   const { username, password } = req.body;
   res.status(200).json({
     status: "success",

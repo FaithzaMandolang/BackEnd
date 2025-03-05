@@ -6,9 +6,18 @@ const app = express();
 const routers = require("./router.js");
 const morgan = require("morgan");
 const path = require("path");
+const cors = require("cors");
 // const errorhandler = require("errorhandler");
 
 app.use(morgan("tiny"));
+
+//middleware CORS
+app.use(
+  cors({
+    origin: "http://127.0.0.1:5500",
+    methods: ["GET", "PUT"], //agar spesific
+  })
+);
 
 //request body
 app.use(express.urlencoded({ extended: true })); //x-www blablabla
