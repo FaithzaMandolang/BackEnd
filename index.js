@@ -7,8 +7,9 @@ const routers = require("./router.js");
 const morgan = require("morgan");
 const path = require("path");
 const cors = require("cors");
-// const errorhandler = require("errorhandler");
+const errorhandler = require("errorhandler");
 
+//middleware morgan
 app.use(morgan("tiny"));
 
 //middleware CORS
@@ -30,7 +31,7 @@ app.use(routers);
 //middleware file statis
 app.use(express.static(path.join(__dirname, "public")));
 
-//middleware respon/biasa untuk 404
+//middleware untuk penanganan routing 404
 app.use((req, res, next) => {
   res.status(404).json({
     status: "error",
