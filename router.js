@@ -3,6 +3,7 @@ const users = require("./users");
 const routers = express.Router();
 const path = require("path");
 const client = require("./mongodb");
+const ObjectId = require("mongodb").ObjectId;
 
 //Middleware untuk file upload
 const fs = require("fs");
@@ -26,41 +27,24 @@ routers.get("/login", (req, res) => {
 routers.get("/", (req, res) => res.send("this is homepage"));
 
 //upload file
-routers.post("/upload", upload.single("file"), (req, res) => {
-  const file = req.file;
-  if (file) {
-    const target = path.join(__dirname, "/public/", file.originalname);
-    fs.renameSync(file.path, target);
-    res.send("file berhasil diupload");
-  } else {
-    res.send("file gagal diupload");
-  }
-});
+// routers.post("/upload", upload.single("file"), (req, res) => {
+//   const file = req.file;
+//   if (file) {
+//     const target = path.join(__dirname, "/public/", file.originalname);
+//     fs.renameSync(file.path, target);
+//     res.send("file berhasil diupload");
+//   } else {
+//     res.send("file gagal diupload");
+//   }
+// });
 
 //download file tanpa path
-routers.get("/download", (req, res) => {
-  const filename = "logo.png";
-  res.sendFile(__dirname + "/download/" + filename);
-});
+// routers.get("/download", (req, res) => {
+//   const filename = "logo.png";
+//   res.sendFile(__dirname + "/download/" + filename);
+// });
 
-routers.put("/login", (req, res) => {
-  const { username, password } = req.body;
-  res.status(200).json({
-    status: "success",
-    data: {
-      username: username,
-      password: password,
-    },
-  });
-});
-
-//get user seluruh data
-// routers.get("/users", (req, res) =>
-//   res.status(200).json({
-//     users,
-//   })
-// );
-
+//ambil semua data users
 routers.get("/users", async (req, res) => {
   try {
     const db = client.db("test");
@@ -77,77 +61,104 @@ routers.get("/users", async (req, res) => {
   }
 });
 
-//get user berdasarkan nama
-// routers.get("/users/:name", (req, res) => {
-//   const name = req.params.name.toLowerCase();
-//   const user = users.find((data) => data.name.toLowerCase() === name);
+//ambil data users berdasarkan id
+routers.get("/users/:id", async (req, res) => {
+  try {
+    const db = client.db("test");
+    const user = await db.collection("users").findOne({
+      _id: new ObjectId(req.params.id),
+    });
+    res.status(200).json({
+      status: "success",
+      message: "single users",
+      data: user,
+    });
+  } catch (error) {}
+});
 
-//   if (!user) {
-//     return res.status(404).json({
-//       message: "Data user tidak ditemukan",
-//     });
-//   }
+//insert user
+routers.post("/users", async (req, res) => {
+  try {
+    const db = client.db("test");
+    const user = await db.collection("users").insertOne(req.body);
+    res.json({
+      status: "success",
+      message: "user created",
+      data: user,
+    });
+  } catch (error) {
+    res.json({
+      status: "error",
+    });
+  }
+});
 
-//   res.status(200).json({ user });
-// });
+//update user
+routers.put("/users/:id", async (req, res) => {
+  try {
+    const db = client.db("test");
+    const updatedUser = await db
+      .collection("users")
+      .updateOne({ _id: new ObjectId(req.params.id) }, { $set: req.body });
+    res.json({
+      status: "success",
+      message: "User updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "An error occurred while updating the user",
+    });
+  }
+});
 
-// routers.post("/users", (req, res) => {
-//   const { name, id } = req.body;
+//delete user
+routers.delete("/users/:id", async (req, res) => {
+  try {
+    const db = client.db("test");
+    const deletedUser = await db.collection("users").deleteOne({
+      _id: new ObjectId(req.params.id),
+    });
+    res.json({
+      status: "success",
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "An error occurred while deleting the user",
+    });
+  }
+});
 
-//   if (!name || !id) {
-//     return res.status(400).json({ error: "Masukan data yang akan diubah" });
-//   }
-
-//   const newUser = { id, name };
-//   res.status(201).json({
-//     message: "User successfully created",
-//     user: newUser,
-//   });
-// });
-
-// routers.put("/users/:name", (req, res) => {
-//   const name = req.params.name.toLowerCase();
-//   const { newName } = req.body;
-
-//   if (!newName) {
-//     return res.status(400).json({
-//       error: "Harus memasukkan setidaknya satu data untuk diperbarui",
-//     });
-//   }
-
-//   // cari user
-//   const userIndex = users.findIndex((data) => data.name.toLowerCase() === name);
-
-//   // user tidak ditemukan
-//   if (userIndex === -1) {
-//     return res.status(404).json({ error: "Data user tidak ditemukan" });
-//   }
-
-//   // edit data user
-//   if (newName) users[userIndex].name = newName;
-
-//   res.status(200).json({
-//     message: "User berhasil diperbarui",
-//     user: users[userIndex],
-//   });
-// });
-
-// routers.delete("/users/:name", (req, res) => {
-//   const name = req.params.name.toLowerCase();
-
-//   const userIndex = users.findIndex((user) => user.name.toLowerCase() === name);
-
-//   if (userIndex === -1) {
-//     return res.status(404).json({ error: "User not found" });
-//   }
-
-//   // Hapus user dari array
-//   const deletedUser = users.splice(userIndex, 1);
-
-//   res.status(200).json({
-//     message: "User successfully deleted",
-//     deletedUser: deletedUser[0],
-//   });
-//});
+//get order user (join/aggrigate)
+routers.get("/users-orders", async (req, res) => {
+  try {
+    const db = client.db("test");
+    const users = await db
+      .collection("users")
+      .aggregate([
+        {
+          $lookup: {
+            from: "Order",
+            localField: "_id",
+            foreignField: "user_id",
+            as: "orders",
+          },
+        },
+      ])
+      .toArray();
+    res.json({
+      status: "success",
+      message: "list users with orders",
+      data: users,
+    });
+  } catch (error) {
+    res.json({
+      status: "error",
+    });
+  }
+});
 
 module.exports = routers;
