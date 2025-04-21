@@ -1,16 +1,17 @@
-const users = [
-  {
-    id: 1,
-    name: "John",
-  },
-  {
-    id: 2,
-    name: "Smith",
-  },
-  {
-    id: 3,
-    name: "Bob",
-  },
-];
+const mongoose = require("mongoose");
 
-module.exports = users;
+const userSchema = mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    age: Number,
+    status: String,
+  },
+  {
+    versionKey: false,
+    timestamps: true,
+  }
+);
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;

@@ -2,13 +2,17 @@ const express = require("express");
 const users = require("./users");
 const routers = express.Router();
 const path = require("path");
-const client = require("./mongodb");
-const ObjectId = require("mongodb").ObjectId;
-
 //Middleware untuk file upload
 const fs = require("fs");
 const multer = require("multer");
 const upload = multer({ dest: "public" });
+// const client = require("./mongodb");
+// const ObjectId = require("mongodb").ObjectId;
+
+//pakai mongoose
+require("./mongoose");
+const User = require("./users");
+const { Agent } = require("http");
 
 //Routing
 
@@ -45,91 +49,139 @@ routers.get("/", (req, res) => res.send("this is homepage"));
 // });
 
 //ambil semua data users
+// routers.get("/users", async (req, res) => {
+//   try {
+//     const db = client.db("test");
+//     const users = await db.collection("users").find().toArray();
+//     res.json({
+//       status: "success",
+//       message: "list users",
+//       data: users,
+//     });
+//   } catch (error) {
+//     res.json({
+//       status: "error",
+//     });
+//   }
+// });
+
+//pakai mongoose
 routers.get("/users", async (req, res) => {
-  try {
-    const db = client.db("test");
-    const users = await db.collection("users").find().toArray();
-    res.json({
-      status: "success",
-      message: "list users",
-      data: users,
-    });
-  } catch (error) {
-    res.json({
-      status: "error",
-    });
-  }
+  const users = await User.find();
+  res.json({
+    status: "success",
+    message: "list users",
+    data: users,
+  });
 });
 
 //ambil data users berdasarkan id
+// routers.get("/users/:id", async (req, res) => {
+//   try {
+//     const db = client.db("test");
+//     const user = await db.collection("users").findOne({
+//       _id: new ObjectId(req.params.id),
+//     });
+//     res.status(200).json({
+//       status: "success",
+//       message: "single users",
+//       data: user,
+//     });
+//   } catch (error) {}
+// });
+
+//pakai mongoose
 routers.get("/users/:id", async (req, res) => {
-  try {
-    const db = client.db("test");
-    const user = await db.collection("users").findOne({
-      _id: new ObjectId(req.params.id),
-    });
-    res.status(200).json({
-      status: "success",
-      message: "single users",
-      data: user,
-    });
-  } catch (error) {}
+  id = req.params.id;
+  const user = await User.findById(id);
+  res.status(200).json({
+    status: "success",
+    message: "single users",
+    data: user,
+  });
 });
 
 //insert user
+// routers.post("/users", async (req, res) => {
+//   try {
+//     const db = client.db("test");
+//     const user = await db.collection("users").insertOne(req.body);
+//     res.json({
+//       status: "success",
+//       message: "user created",
+//       data: user,
+//     });
+//   } catch (error) {
+//     res.json({
+//       status: "error",
+//     });
+//   }
+// });
+
+//pakai mongoose
 routers.post("/users", async (req, res) => {
-  try {
-    const db = client.db("test");
-    const user = await db.collection("users").insertOne(req.body);
-    res.json({
-      status: "success",
-      message: "user created",
-      data: user,
-    });
-  } catch (error) {
-    res.json({
-      status: "error",
-    });
-  }
+  const { name, age, status } = req.body;
+  const newUser = await User.create({
+    name: name,
+    age: age,
+    status: status,
+  });
+  res.json({
+    status: "success",
+    message: "user created",
+    data: newUser,
+  });
 });
 
 //update user
-routers.put("/users/:id", async (req, res) => {
-  try {
-    const db = client.db("test");
-    const updatedUser = await db
-      .collection("users")
-      .updateOne({ _id: new ObjectId(req.params.id) }, { $set: req.body });
-    res.json({
-      status: "success",
-      message: "User updated successfully",
-      data: updatedUser,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      message: "An error occurred while updating the user",
-    });
-  }
-});
+// routers.put("/users/:id", async (req, res) => {
+//   try {
+//     const db = client.db("test");
+//     const updatedUser = await db
+//       .collection("users")
+//       .updateOne({ _id: new ObjectId(req.params.id) }, { $set: req.body });
+//     res.json({
+//       status: "success",
+//       message: "User updated successfully",
+//       data: updatedUser,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       status: "error",
+//       message: "An error occurred while updating the user",
+//     });
+//   }
+// });
+
+//pakai mongoose
 
 //delete user
+// routers.delete("/users/:id", async (req, res) => {
+//   try {
+//     const db = client.db("test");
+//     const deletedUser = await db.collection("users").deleteOne({
+//       _id: new ObjectId(req.params.id),
+//     });
+//     res.json({
+//       status: "success",
+//       message: "User deleted successfully",
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       status: "error",
+//       message: "An error occurred while deleting the user",
+//     });
+//   }
+// });
+
+//pakai mongoose
 routers.delete("/users/:id", async (req, res) => {
-  try {
-    const db = client.db("test");
-    const deletedUser = await db.collection("users").deleteOne({
-      _id: new ObjectId(req.params.id),
-    });
-    res.json({
-      status: "success",
-      message: "User deleted successfully",
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      message: "An error occurred while deleting the user",
-    });
-  }
+  const id = req.params.id;
+  const deletedUser = await User.findByIdAndDelete(id);
+  res.json({
+    status: "success",
+    message: "User deleted successfully",
+  });
 });
 
 //get order user (join/aggrigate)
